@@ -1,25 +1,41 @@
-import logo from './logo.svg';
+import React, { useState } from 'react';
+import FileUpload from './Components/FileUpload';
+import SeniorCitizensList from './Components/SeniorCitizensList';
+import { exportToExcel } from './utils/exporttoExcel';
 import './App.css';
 
-function App() {
+const App = () => {
+  const [seniorCitizens, setSeniorCitizens] = useState([]);
+
+  const handleData = (data) => {
+    const headers = data[0];
+    const ageIndex = headers.indexOf('age');
+
+    if (ageIndex === -1) {
+      alert('Age column not found');
+      return;
+    }
+
+    const filteredData = data.filter((row, index) => index === 0 || (row[ageIndex] >= 65));
+    setSeniorCitizens(filteredData);
+  };
+
+  const downloadSeniorCitizens = () => {
+    exportToExcel(seniorCitizens, 'Senior_Citizens_List');
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className="container">
+        <h1>SENIOR CITIZEN FILTER</h1>
+        <FileUpload onData={handleData} />
+        <SeniorCitizensList data={seniorCitizens} />
+        {seniorCitizens.length > 1 && (
+          <button onClick={downloadSeniorCitizens}>Download Senior Citizens List</button>
+        )}
+      </div>
     </div>
   );
-}
+};
 
 export default App;
